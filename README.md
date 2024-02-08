@@ -1,2 +1,2 @@
-# message-board-go
-trying out go, another basic message board. will rip out the old frontend
+# simple-wiki-go
+its a simple wiki written in go for my education

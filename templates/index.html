@@ -1,0 +1,14 @@
+<h1>Page Index</h1>
+
+
+<a href="/add_new_page">Add a new page</a>
+
+
+<h3>Existing Pages:</h3>
+<ul>
+    {{range .}}
+    <li>
+        <a href="/view/{{.Title}}">{{.DisplayTitle}}</a>
+    </li>
+    {{end}}
+</ul>
