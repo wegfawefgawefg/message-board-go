@@ -1,0 +1,28 @@
+/* default */
+body {
+    font-family: "Courier New", monospace;
+    /* default font */
+    font-size: 16px;
+    /* default font size */
+    line-height: 1.6;
+    /* default line height */
+    margin: 0;
+    /* Removes default margin */
+    padding: 0;
+    /* Removes default padding */
+}
+
+.page-body {
+    white-space: pre-wrap;
+    /* make text purple */
+    /* color: #800080; */
+    line-height: 0.6;
+    /* Further reduced */
+    margin: 0;
+    /* Removes default margin */
+    padding: 0;
+    /* Removes default padding */
+
+    /* monospace font */
+
+}

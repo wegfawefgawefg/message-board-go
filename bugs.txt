@@ -1,5 +1,5 @@
-newlines not rendering correctly in view
-reject page names on backend, not just frontend
 
 # fixed
+newlines not rendering correctly in view
 spaces not working in page titles
+reject page names on backend, not just frontend

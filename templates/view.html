@@ -1,7 +1,12 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+</head>
+
+
 <a href="/index">Back to index</a>
 
 <h1>{{.Title}}</h1>
 
 <p>[<a href="/edit/{{.InternalTitle}}">edit</a>]</p>
 
-<div>{{printf "%s" .Body}}</div>
+<div class="page-body">{{nl2br .Body}}</div>

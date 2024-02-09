@@ -53,8 +53,26 @@ func addNewPageHandler(w http.ResponseWriter, r *http.Request) {
 
 // called by the add new page form
 // makes a new blank page
+func isValidPageTitle(title string) bool {
+	// Regex to allow alphanumeric and spaces, adjust your rules as needed
+	re := regexp.MustCompile(`^[a-zA-Z0-9 ]+$`)
+	return re.MatchString(title) && title != ""
+}
+
 func internalAddNewPageHandler(w http.ResponseWriter, r *http.Request) {
+	// if its not valid, redirect to the add new page form, with a name error message
 	displayTitle := r.FormValue("displayTitle")
+	if !isValidPageTitle(displayTitle) {
+		// Prepare data to pass to the template, including the error message
+		data := map[string]interface{}{
+			"Error":          "Title must be alphanumeric and cannot contain special characters or underscores.",
+			"AttemptedTitle": displayTitle,
+		}
+		// Render the form template with the data
+		templates.ExecuteTemplate(w, "add_new_page.html", data)
+		return
+	}
+
 	p := &Page{
 		Title:         displayTitle,
 		InternalTitle: titleToInternalTitle(displayTitle),

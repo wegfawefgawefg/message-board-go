@@ -15,8 +15,10 @@ type Page struct {
 	Body          []byte
 }
 
+var funcMap = template.FuncMap{"nl2br": nl2br}
+
 var templates = template.Must(
-	template.ParseFiles(
+	template.New("").Funcs(funcMap).ParseFiles(
 		templates_path+"/edit.html",
 		templates_path+"/view.html",
 		templates_path+"/index.html",
@@ -24,6 +26,9 @@ var templates = template.Must(
 	))
 
 func main() {
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
 	http.HandleFunc("/save/", saveHandler)
