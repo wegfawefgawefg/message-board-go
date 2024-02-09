@@ -1,15 +1,18 @@
+<a href="/index">Back to index</a>
+
+
 <h1>Make A New Page</h1>
 <h2>What will you name it?</h2>
 
 <form action="/internal_add_new_page" method="POST">
-    <div><textarea name="title" rows="1" cols="40"></textarea></div>
+    <div><textarea name="displayTitle" rows="1" cols="40"></textarea></div>
     <div><input type="submit" value="Save"></div>
 </form>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector("form");
-        const titleInput = document.querySelector("textarea[name='title']");
+        const titleInput = document.querySelector("textarea[name='displayTitle']");
 
         form.addEventListener("submit", function (event) {
             // Regular expression for checking if the string is alphanumeric
@@ -17,7 +20,7 @@
 
             // Check if the title value is not alphanumeric
             if (!isAlphanumeric.test(titleInput.value)) {
-                alert("Title must be alphanumeric and cannot contain spaces or underscores.");
+                alert("Title must be alphanumeric and cannot contain special characters underscores.");
                 event.preventDefault(); // Prevent form from submitting
                 return false;
             }

@@ -1,0 +1,5 @@
+newlines not rendering correctly in view
+reject page names on backend, not just frontend
+
+# fixed
+spaces not working in page titles

@@ -7,16 +7,13 @@ import (
 	"regexp"
 )
 
-// //////////////////////	Handlers ///////////////////////
-
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/index", http.StatusFound)
 }
 
-// struct with two strings, display title and title
 type IndexPageListing struct {
-	DisplayTitle string
-	Title        string
+	Title         string
+	InternalTitle string
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,8 +27,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	var page_listings []IndexPageListing
 	for _, file := range files {
 		page_listing := IndexPageListing{
-			DisplayTitle: filenameToTitle(file.Name()),
-			Title:        file.Name(),
+			InternalTitle: file.Name(),
+			Title:         internalTitleToTitle(file.Name()),
 		}
 		page_listings = append(page_listings, page_listing)
 	}
@@ -51,46 +48,42 @@ func addNewPageHandler(w http.ResponseWriter, r *http.Request) {
 	if template_err != nil {
 		http.Error(w, template_err.Error(), http.StatusInternalServerError)
 	}
+
 }
 
 // called by the add new page form
 // makes a new blank page
 func internalAddNewPageHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.FormValue("title")
-	p := &Page{Title: title}
+	displayTitle := r.FormValue("displayTitle")
+	p := &Page{
+		Title:         displayTitle,
+		InternalTitle: titleToInternalTitle(displayTitle),
+		Body:          []byte(""),
+	}
 	err := p.save()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	filename := titleToFilename(title)
-	http.Redirect(w, r, "/edit/"+filename, http.StatusFound)
+	http.Redirect(w, r, "/edit/"+p.InternalTitle, http.StatusFound)
 }
 
-// /////////////	Page View / Edit / Save Handlers //////////
+var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9_]+)$")
 
-var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
-
-// meta handler for the page specific handlers
-func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
-
-	return func(w http.ResponseWriter, r *http.Request) {
-		m := validPath.FindStringSubmatch(r.URL.Path)
-		if m == nil {
-			http.NotFound(w, r)
-			return
-		}
-		fmt.Println(m[2])
-		fn(w, r, m[2])
+func extractInternalTitleFromPageRequest(r *http.Request) string {
+	m := validPath.FindStringSubmatch(r.URL.Path)
+	if m == nil {
+		return ""
 	}
+	return m[2]
 }
 
-// used via meta handler
-func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
+func viewHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("viewHandler start")
-	p, err := loadPage(title)
+	internalTitle := extractInternalTitleFromPageRequest(r)
+	p, err := loadPage(internalTitle)
 	if err != nil {
-		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
+		http.Redirect(w, r, "/edit/"+p.InternalTitle, http.StatusFound)
 		return
 	}
 	template_err := templates.ExecuteTemplate(w, "view.html", p)
@@ -100,9 +93,9 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	fmt.Println("viewHandler end")
 }
 
-// used via meta handler
-func editHandler(w http.ResponseWriter, r *http.Request, title string) {
+func editHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("editHandler start")
+	title := extractInternalTitleFromPageRequest(r)
 	p, err := loadPage(title)
 	if err != nil {
 		p = &Page{Title: title}
@@ -114,15 +107,21 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	fmt.Println("editHandler end")
 }
 
-// used via meta handler
-func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
-
+func saveHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("saveHandler start")
+	internalTitle := extractInternalTitleFromPageRequest(r)
+	fmt.Println("internalTitle: ", internalTitle)
 	body := r.FormValue("body")
-	p := &Page{Title: title, Body: []byte(body)}
+
+	p := &Page{
+		Title:         internalTitleToTitle(internalTitle),
+		InternalTitle: internalTitle,
+		Body:          []byte(body)}
 	err := p.save()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/view/"+title, http.StatusFound)
+	http.Redirect(w, r, "/view/"+internalTitle, http.StatusFound)
+	fmt.Println("saveHandler end")
 }
